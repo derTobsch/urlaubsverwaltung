@@ -305,6 +305,12 @@
       <artifactId>google-api-services-calendar</artifactId>
       <version>${google-api-services-calendar.version}</version>
     </dependency>
+    <!-- iCal -->
+    <dependency>
+      <groupId>org.mnode.ical4j</groupId>
+      <artifactId>ical4j</artifactId>
+      <version>3.0.6</version>
+    </dependency>
   </dependencies>
 
   <build>
