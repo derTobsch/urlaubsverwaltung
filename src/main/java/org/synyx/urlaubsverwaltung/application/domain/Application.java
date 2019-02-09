@@ -3,6 +3,7 @@ package org.synyx.urlaubsverwaltung.application.domain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.synyx.urlaubsverwaltung.calendarintegration.absence.EventType;
 import org.synyx.urlaubsverwaltung.period.DayLength;
 import org.synyx.urlaubsverwaltung.period.Period;
 import org.synyx.urlaubsverwaltung.person.Person;
@@ -552,5 +553,17 @@ public class Application extends AbstractPersistable<Integer> {
         }
 
         return null;
+    }
+
+
+    public EventType getEventType() {
+
+        if (this.status == ApplicationStatus.ALLOWED) {
+            return EventType.ALLOWED_APPLICATION;
+        } else if (this.status == ApplicationStatus.WAITING || this.status == ApplicationStatus.TEMPORARY_ALLOWED) {
+            return EventType.WAITING_APPLICATION;
+        }
+
+        throw new IllegalStateException("Cannot map " + this.status.name() + " to EventType.");
     }
 }
