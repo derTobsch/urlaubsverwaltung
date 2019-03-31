@@ -10,7 +10,7 @@ import org.synyx.urlaubsverwaltung.calendarintegration.providers.ical.ICalServic
 import javax.servlet.http.HttpServletResponse;
 
 
-@Api(value = "iCal", description = "Get iCal")
+@Api(value = "iCal")
 @Controller
 public class ICalController {
 
