@@ -1,4 +1,4 @@
-package org.synyx.urlaubsverwaltung.core.ical;
+package org.synyx.urlaubsverwaltung.calendarintegration.providers.ical;
 
 import net.fortuna.ical4j.model.Calendar;
 import org.joda.time.DateMidnight;
@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceTimeConfiguration;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.EventType;
-import org.synyx.urlaubsverwaltung.core.absence.AbsenceService;
+import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceService;
 import org.synyx.urlaubsverwaltung.period.DayLength;
 import org.synyx.urlaubsverwaltung.period.Period;
 import org.synyx.urlaubsverwaltung.person.Person;

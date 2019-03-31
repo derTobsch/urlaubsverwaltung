@@ -1,11 +1,11 @@
-package org.synyx.urlaubsverwaltung.restapi.ical;
+package org.synyx.urlaubsverwaltung.calendarintegration.providers.ical.api;
 
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.synyx.urlaubsverwaltung.core.ical.ICalService;
+import org.synyx.urlaubsverwaltung.calendarintegration.providers.ical.ICalService;
 
 import javax.servlet.http.HttpServletResponse;
 

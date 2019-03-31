@@ -1,4 +1,4 @@
-package org.synyx.urlaubsverwaltung.core.ical;
+package org.synyx.urlaubsverwaltung.calendarintegration.providers.ical;
 
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
-import org.synyx.urlaubsverwaltung.core.absence.AbsenceService;
+import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceService;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
 
 import java.util.List;
