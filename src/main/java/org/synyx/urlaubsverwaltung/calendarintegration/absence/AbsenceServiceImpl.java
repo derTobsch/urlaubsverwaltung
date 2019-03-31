@@ -7,7 +7,6 @@ import org.synyx.urlaubsverwaltung.application.service.ApplicationService;
 import org.synyx.urlaubsverwaltung.settings.CalendarSettings;
 import org.synyx.urlaubsverwaltung.settings.SettingsService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -38,9 +37,7 @@ public class AbsenceServiceImpl implements AbsenceService {
         AbsenceTimeConfiguration config = new AbsenceTimeConfiguration(calendarSettings);
 
         List<Application> applications = applicationService.getForStates(asList(ALLOWED, WAITING, TEMPORARY_ALLOWED));
-        List<Absence> absences = new ArrayList<>();
-        absences.addAll(applications.stream().map(application -> of(application, config)).collect(toList()));
 
-        return absences;
+        return applications.stream().map(application -> of(application, config)).collect(toList());
     }
 }

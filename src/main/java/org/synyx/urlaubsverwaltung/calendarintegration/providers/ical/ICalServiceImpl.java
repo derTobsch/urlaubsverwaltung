@@ -8,16 +8,14 @@ import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.model.property.XProperty;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-
-import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceService;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
+import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceService;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 @Service
@@ -42,7 +40,7 @@ public class ICalServiceImpl implements ICalService {
 
         List<Absence> absences = absenceService.getOpenAbsences();
 
-        List<VEvent> vEvents = absences.stream().map(this::toVEvent).collect(Collectors.toList());
+        List<VEvent> vEvents = absences.stream().map(this::toVEvent).collect(toList());
         Calendar iCal = new Calendar();
         iCal.getProperties().add(new ProdId("-//Urlaubsverwaltung//iCal4j 1.0//DE"));
         iCal.getProperties().add(new XProperty("X-WR-CALNAME", "Urlaube"));
