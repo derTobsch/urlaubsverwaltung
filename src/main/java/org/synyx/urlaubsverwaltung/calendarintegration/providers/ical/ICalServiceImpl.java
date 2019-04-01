@@ -11,7 +11,7 @@ import net.fortuna.ical4j.model.property.XProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
-import org.synyx.urlaubsverwaltung.calendarintegration.absence.AbsenceService;
+import org.synyx.urlaubsverwaltung.absence.service.AbsenceService;
 
 import java.util.List;
 
