@@ -1,4 +1,4 @@
-package org.synyx.urlaubsverwaltung.settings.web;
+package org.synyx.urlaubsverwaltung.calendarintegration.providers.google;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -46,6 +46,13 @@ public class GoogleCalendarOAuthHandshakeController {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     private static HttpTransport httpTransport;
+    static {
+        try {
+            httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        } catch (GeneralSecurityException | IOException e) {
+            LOG.error("Could not instantiate GoogleNetHttpTransport",e);
+        }
+    }
 
     private final SettingsService settingsService;
     private final CalendarSyncService calendarSyncService;
@@ -53,12 +60,10 @@ public class GoogleCalendarOAuthHandshakeController {
     private GoogleAuthorizationCodeFlow flow;
 
     @Autowired
-    public GoogleCalendarOAuthHandshakeController(SettingsService settingsService, CalendarSyncService calendarSyncService)
-            throws GeneralSecurityException, IOException {
+    public GoogleCalendarOAuthHandshakeController(SettingsService settingsService, CalendarSyncService calendarSyncService) {
 
         this.settingsService = settingsService;
         this.calendarSyncService = calendarSyncService;
-        httpTransport = GoogleNetHttpTransport.newTrustedTransport();
     }
 
     @PreAuthorize(SecurityRules.IS_OFFICE)
@@ -104,11 +109,7 @@ public class GoogleCalendarOAuthHandshakeController {
             LOG.error("Exception while handling OAuth2 callback ({}) Redirecting to google connection status page.", e.getMessage(), e);
         }
 
-        StringBuilder buf = new StringBuilder();
-        buf.append("redirect:/web/settings");
-        buf.append("#calendar");
-
-        return buf.toString();
+        return "redirect:/web/settings#calendar";
     }
 
     private static HttpResponse checkGoogleCalendar(Calendar client, Settings settings) throws IOException {

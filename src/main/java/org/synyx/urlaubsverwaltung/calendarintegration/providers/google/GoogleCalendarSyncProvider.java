@@ -1,16 +1,6 @@
 package org.synyx.urlaubsverwaltung.calendarintegration.providers.google;
 
-import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.BasicAuthentication;
-import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -27,7 +17,6 @@ import org.synyx.urlaubsverwaltung.settings.GoogleCalendarSettings;
 import org.synyx.urlaubsverwaltung.settings.SettingsService;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
@@ -40,71 +29,27 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class GoogleCalendarSyncProvider implements CalendarProvider {
 
-    private static final String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
-    /**
-     * Global instance of the JSON factory.
-     */
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Logger LOG = getLogger(lookup().lookupClass());
 
-    public static final String APPLICATION_NAME = "Urlaubsverwaltung";
-    protected static final String GOOGLEAPIS_OAUTH2_V4_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
+    static final String APPLICATION_NAME = "Urlaubsverwaltung";
 
     private Calendar googleCalendarClient;
-    private int refreshTokenHashCode;
     private final MailService mailService;
     private final SettingsService settingsService;
+    private final GoogleCalendarFactory googleCalendarFactory;
 
     @Autowired
-    public GoogleCalendarSyncProvider(MailService mailService, SettingsService settingsService) {
+    public GoogleCalendarSyncProvider(MailService mailService, SettingsService settingsService, GoogleCalendarFactory googleCalendarFactory) {
 
         this.settingsService = settingsService;
         this.mailService = mailService;
+        this.googleCalendarFactory = googleCalendarFactory;
     }
-
-    /**
-     * Build and return an authorized google calendar client.
-     *
-     * @return an authorized calendar client service
-     */
-    private Calendar getOrCreateGoogleCalendarClient() {
-
-        String refreshToken = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getRefreshToken();
-
-        if (googleCalendarClient != null && refreshToken != null && refreshTokenHashCode == refreshToken.hashCode()) {
-            LOG.debug("use cached googleCalendarClient");
-            return googleCalendarClient;
-        }
-
-        try {
-            LOG.info("create new googleCalendarClient");
-
-            if (refreshToken != null) {
-                refreshTokenHashCode = refreshToken.hashCode();
-            }
-
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            TokenResponse tokenResponse = new TokenResponse();
-            tokenResponse.setRefreshToken(refreshToken);
-
-            Credential credential = createCredentialWithRefreshToken(httpTransport, JSON_FACTORY, tokenResponse);
-
-            return new Calendar.Builder(httpTransport, JSON_FACTORY, credential)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        } catch (GeneralSecurityException | IOException e) {
-            LOG.error("Could not create or get a google calendar instance!", e);
-        }
-
-        return null;
-    }
-
 
     @Override
     public Optional<String> add(Absence absence, CalendarSettings calendarSettings) {
 
-        googleCalendarClient = getOrCreateGoogleCalendarClient();
+        googleCalendarClient = googleCalendarFactory.getOrCreateGoogleCalendarClient();
 
         if (googleCalendarClient != null) {
             GoogleCalendarSettings googleCalendarSettings =
@@ -131,7 +76,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
     @Override
     public void update(Absence absence, String eventId, CalendarSettings calendarSettings) {
 
-        googleCalendarClient = getOrCreateGoogleCalendarClient();
+        googleCalendarClient = googleCalendarFactory.getOrCreateGoogleCalendarClient();
 
         if (googleCalendarClient != null) {
 
@@ -158,7 +103,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
     @Override
     public void delete(String eventId, CalendarSettings calendarSettings) {
 
-        googleCalendarClient = getOrCreateGoogleCalendarClient();
+        googleCalendarClient = googleCalendarFactory.getOrCreateGoogleCalendarClient();
 
         if (googleCalendarClient != null) {
 
@@ -178,7 +123,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
     @Override
     public void checkCalendarSyncSettings(CalendarSettings calendarSettings) {
 
-        googleCalendarClient = getOrCreateGoogleCalendarClient();
+        googleCalendarClient = googleCalendarFactory.getOrCreateGoogleCalendarClient();
 
         if (googleCalendarClient != null) {
             String calendarId =
@@ -194,20 +139,6 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
                 LOG.warn("Could not connect to calendar with calendar id '{}'", calendarId, e);
             }
         }
-    }
-
-    private Credential createCredentialWithRefreshToken(HttpTransport transport, JsonFactory jsonFactory, TokenResponse tokenResponse) {
-
-        String clientId = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientId();
-        String clientSecret = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientSecret();
-
-        return new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
-            .setTransport(transport)
-            .setJsonFactory(jsonFactory)
-            .setTokenServerUrl(new GenericUrl(GOOGLEAPIS_OAUTH2_V4_TOKEN))
-            .setClientAuthentication(new BasicAuthentication(clientId, clientSecret))
-            .build()
-            .setFromTokenResponse(tokenResponse);
     }
 
     private static Event fillEvent(Absence absence, Event event) {
@@ -226,7 +157,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
         if (absence.isAllDay()) {
             // To create an all-day event, you must use setDate() having created DateTime objects using a String
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN_YYYY_MM_DD);
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String startDateStr = dateTimeFormatter.format(absence.getStartDate());
             String endDateStr = dateTimeFormatter.format(absence.getEndDate());
 
