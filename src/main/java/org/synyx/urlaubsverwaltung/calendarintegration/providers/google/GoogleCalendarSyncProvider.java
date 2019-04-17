@@ -29,11 +29,11 @@ import org.synyx.urlaubsverwaltung.settings.SettingsService;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 
 import static java.lang.invoke.MethodHandles.lookup;
+import static java.util.Collections.singletonList;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -67,17 +67,15 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
      *
      * @return an authorized calendar client service
      */
-    private com.google.api.services.calendar.Calendar getOrCreateGoogleCalendarClient() {
+    private Calendar getOrCreateGoogleCalendarClient() {
 
-        String refreshToken =
-                settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getRefreshToken();
+        String refreshToken = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getRefreshToken();
 
-        if (googleCalendarClient != null &&
-                refreshToken != null &&
-                refreshTokenHashCode == refreshToken.hashCode()) {
+        if (googleCalendarClient != null && refreshToken != null && refreshTokenHashCode == refreshToken.hashCode()) {
             LOG.debug("use cached googleCalendarClient");
             return googleCalendarClient;
         }
+
         try {
             LOG.info("create new googleCalendarClient");
 
@@ -91,11 +89,12 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
             Credential credential = createCredentialWithRefreshToken(httpTransport, JSON_FACTORY, tokenResponse);
 
-            return new com.google.api.services.calendar.Calendar.Builder(
-                    httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+            return new Calendar.Builder(httpTransport, JSON_FACTORY, credential)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
 
         } catch (GeneralSecurityException | IOException e) {
-            LOG.error("Something went wrong!", e);
+            LOG.error("Could not create or get a google calendar instance!", e);
         }
 
         return null;
@@ -109,21 +108,19 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
         if (googleCalendarClient != null) {
             GoogleCalendarSettings googleCalendarSettings =
-                    settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings();
+                settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings();
             String calendarId = googleCalendarSettings.getCalendarId();
 
             try {
-                Event eventToCommit = new Event();
-                fillEvent(absence, eventToCommit);
-
+                final Event eventToCommit = fillEvent(absence, new Event());
                 Event eventInCalendar = googleCalendarClient.events().insert(calendarId, eventToCommit).execute();
 
                 LOG.info("Event {} for '{}' added to calendar '{}'.", eventInCalendar.getId(),
-                        absence.getPerson().getNiceName(), eventInCalendar.getSummary());
+                    absence.getPerson().getNiceName(), eventInCalendar.getSummary());
                 return Optional.of(eventInCalendar.getId());
 
             } catch (IOException ex) {
-                LOG.warn("An error occurred while trying to add appointment to calendar %s", calendarId, ex);
+                LOG.warn("An error occurred while trying to add appointment to calendar {}", calendarId, ex);
                 mailService.sendCalendarSyncErrorNotification(calendarId, absence, ex.toString());
             }
         }
@@ -138,18 +135,17 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
         if (googleCalendarClient != null) {
 
-            String calendarId =
-                    settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
+            String calendarId = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
 
             try {
                 // gather exiting event
                 Event event = googleCalendarClient.events().get(calendarId, eventId).execute();
 
                 // update event with absence
-                fillEvent(absence, event);
+                final Event updatedEvent = fillEvent(absence, event);
 
                 // sync event to calendar
-                googleCalendarClient.events().patch(calendarId, eventId, event).execute();
+                googleCalendarClient.events().patch(calendarId, eventId, updatedEvent).execute();
 
                 LOG.info("Event {} has been updated in calendar '{}'.", eventId, calendarId);
             } catch (IOException ex) {
@@ -159,7 +155,6 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
         }
     }
 
-
     @Override
     public void delete(String eventId, CalendarSettings calendarSettings) {
 
@@ -167,8 +162,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
         if (googleCalendarClient != null) {
 
-            String calendarId =
-                    settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
+            String calendarId = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
 
             try {
                 googleCalendarClient.events().delete(calendarId, eventId).execute();
@@ -181,7 +175,6 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
         }
     }
 
-
     @Override
     public void checkCalendarSyncSettings(CalendarSettings calendarSettings) {
 
@@ -189,7 +182,7 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
 
         if (googleCalendarClient != null) {
             String calendarId =
-                    settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
+                settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getCalendarId();
             try {
                 HttpResponse httpResponse = googleCalendarClient.calendarList().get(calendarId).executeUsingHead();
                 if (httpResponse.getStatusCode() == SC_OK) {
@@ -203,36 +196,30 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
         }
     }
 
-    private Credential createCredentialWithRefreshToken(
-            HttpTransport transport,
-            JsonFactory jsonFactory,
-            TokenResponse tokenResponse) {
+    private Credential createCredentialWithRefreshToken(HttpTransport transport, JsonFactory jsonFactory, TokenResponse tokenResponse) {
 
-        String clientId =
-                settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientId();
-        String clientSecret =
-                settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientSecret();
+        String clientId = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientId();
+        String clientSecret = settingsService.getSettings().getCalendarSettings().getGoogleCalendarSettings().getClientSecret();
 
-        return new Credential.Builder(BearerToken.authorizationHeaderAccessMethod()).setTransport(
-                transport)
-                .setJsonFactory(jsonFactory)
-                .setTokenServerUrl(
-                        new GenericUrl(GOOGLEAPIS_OAUTH2_V4_TOKEN))
-                .setClientAuthentication(new BasicAuthentication(
-                        clientId,
-                        clientSecret))
-                .build()
-                .setFromTokenResponse(tokenResponse);
+        return new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
+            .setTransport(transport)
+            .setJsonFactory(jsonFactory)
+            .setTokenServerUrl(new GenericUrl(GOOGLEAPIS_OAUTH2_V4_TOKEN))
+            .setClientAuthentication(new BasicAuthentication(clientId, clientSecret))
+            .build()
+            .setFromTokenResponse(tokenResponse);
     }
 
-    private static void fillEvent(Absence absence, Event event) {
+    private static Event fillEvent(Absence absence, Event event) {
 
-        event.setSummary(absence.getEventSubject());
+        final Event newEvent = event.clone();
+
+        newEvent.setSummary(absence.getEventSubject());
 
         EventAttendee eventAttendee = new EventAttendee();
         eventAttendee.setEmail(absence.getPerson().getEmail());
         eventAttendee.setDisplayName(absence.getPerson().getNiceName());
-        event.setAttendees(Collections.singletonList(eventAttendee));
+        newEvent.setAttendees(singletonList(eventAttendee));
 
         EventDateTime startEventDateTime;
         EventDateTime endEventDateTime;
@@ -256,8 +243,9 @@ public class GoogleCalendarSyncProvider implements CalendarProvider {
             endEventDateTime = new EventDateTime().setDateTime(dateTimeEnd);
         }
 
-        event.setStart(startEventDateTime);
-        event.setEnd(endEventDateTime);
-    }
+        newEvent.setStart(startEventDateTime);
+        newEvent.setEnd(endEventDateTime);
 
+        return newEvent;
+    }
 }

@@ -24,7 +24,7 @@ public class CalendarService {
     /**
      * @return configured CalendarProvider or NoopCalendarSyncProvider in case of problems
      */
-    public CalendarProvider getCalendarProvider() {
+    CalendarProvider getCalendarProvider() {
         String calenderProvider = settingsService.getSettings().getCalendarSettings().getProvider();
 
         Optional<CalendarProvider> option = calendarProviders.stream()
