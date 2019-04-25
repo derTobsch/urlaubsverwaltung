@@ -28,6 +28,7 @@ module.exports = {
     vacation_overview: './src/main/webapp/bundles/vacation-overview.js',
     department_form: './src/main/webapp/bundles/department-form.js',
     department_list: './src/main/webapp/bundles/department-list.js',
+    department_graph: './src/main/webapp/bundles/department-graph.js',
     overtime_form: './src/main/webapp/bundles/overtime-form.js',
     settings_form: './src/main/webapp/bundles/settings-form.js',
     account_form: './src/main/webapp/bundles/account-form.js',

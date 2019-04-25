@@ -163,7 +163,9 @@
                             </c:forEach>
                             </tbody>
                         </table>
-
+                        <a href="${URL_PREFIX}/department/graph" class="fa-action pull-right">
+                            <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> <spring:message code="action.department.graph"/>
+                        </a>
                     </c:otherwise>
                 </c:choose>
 

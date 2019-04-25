@@ -1,5 +1,7 @@
 package org.synyx.urlaubsverwaltung.department.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -72,6 +74,25 @@ public class DepartmentController {
         model.addAttribute(PERSONS_ATTRIBUTE, persons);
 
         return DepartmentConstants.DEPARTMENT_FORM_JSP;
+    }
+
+    @PreAuthorize(SecurityRules.IS_BOSS_OR_OFFICE)
+    @GetMapping("/department/graph")
+    public String showDepartmentGraph(Model model) {
+
+        List<Department> departments = departmentService.getAllDepartments();
+
+        String departmentsJson = null;
+
+        try {
+            departmentsJson = new ObjectMapper().writeValueAsString(departments);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        model.addAttribute(DepartmentConstants.DEPARTMENTS_JSON_ATTRIBUTE, departmentsJson);
+
+        return DepartmentConstants.DEPARTMENT_GRAPH_JSP;
     }
 
 
