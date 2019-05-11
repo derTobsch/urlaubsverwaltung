@@ -1,9 +1,6 @@
 package org.synyx.urlaubsverwaltung.calendarintegration.providers.ical;
 
 import net.fortuna.ical4j.model.Calendar;
-import org.joda.time.DateMidnight;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
@@ -15,11 +12,13 @@ import org.synyx.urlaubsverwaltung.period.Period;
 import org.synyx.urlaubsverwaltung.person.Person;
 import org.synyx.urlaubsverwaltung.settings.CalendarSettings;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.joda.time.DateTimeZone.UTC;
-import static org.joda.time.format.DateTimeFormat.forPattern;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,7 +33,7 @@ public class ICalServiceImplTest {
 
     private ICalServiceImpl sut;
     private AbsenceService absenceServiceMock;
-    private DateTimeFormatter dateTimeFormatter = forPattern("yyyyMMdd'T'HHmmss'Z'");
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
     private String currentDTSTAMP;
     private String currentDTSTAMPPlusOneSecond;
 
@@ -44,9 +43,9 @@ public class ICalServiceImplTest {
         absenceServiceMock = mock(AbsenceService.class);
         sut = new ICalServiceImpl(absenceServiceMock);
 
-        DateTime dateTime = new DateTime(UTC);
-        currentDTSTAMP = dateTimeFormatter.print(dateTime); // This is not very nice. But there is no way to manipulate the ical lib to print a prepared stamp
-        currentDTSTAMPPlusOneSecond = dateTimeFormatter.print(dateTime.plusSeconds(1)); // This is not very nice. But there is no way to manipulate the ical lib to print a prepared stamp
+        ZonedDateTime dateTime = ZonedDateTime.now(ZoneOffset.UTC);
+        currentDTSTAMP = dateTimeFormatter.format(dateTime); // This is not very nice. But there is no way to manipulate the ical lib to print a prepared stamp
+        currentDTSTAMPPlusOneSecond = dateTimeFormatter.format(dateTime.plusSeconds(1)); // This is not very nice. But there is no way to manipulate the ical lib to print a prepared stamp
     }
 
 
@@ -114,12 +113,10 @@ public class ICalServiceImplTest {
     }
 
 
-    private Absence absence(String id, String firstName, String lastName, DateTime startTime, DateTime endTime,
-        DayLength length, EventType eventType) {
+    private Absence absence(String id, String firstName, String lastName, LocalDate start, LocalDate end,
+                            DayLength length, EventType eventType) {
 
         Person person = new Person("", firstName, lastName, "doesntmatter");
-        DateMidnight start = startTime.toDateMidnight();
-        DateMidnight end = endTime.toDateMidnight();
         Period period = new Period(start, end, length);
         AbsenceTimeConfiguration timConfig = new AbsenceTimeConfiguration(new CalendarSettings());
 
@@ -127,10 +124,12 @@ public class ICalServiceImplTest {
     }
 
 
-    private static DateTime toDateTime(String input) {
+    private static LocalDate toDateTime(String input) {
 
-        String pattern = "yyyy-MM-dddd";
+        String pattern = "yyyy-MM-dd";
 
-        return DateTime.parse(input, forPattern(pattern));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+
+        return LocalDate.parse(input, formatter);
     }
 }

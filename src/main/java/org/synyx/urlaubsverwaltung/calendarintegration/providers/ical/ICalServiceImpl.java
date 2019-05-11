@@ -13,7 +13,11 @@ import org.springframework.stereotype.Service;
 import org.synyx.urlaubsverwaltung.calendarintegration.absence.Absence;
 import org.synyx.urlaubsverwaltung.absence.service.AbsenceService;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.TimeZone;
 
 import static java.util.stream.Collectors.toList;
 
@@ -53,16 +57,19 @@ public class ICalServiceImpl implements ICalService {
 
     private VEvent toVEvent(Absence absence) {
 
-        DateTime end = new DateTime(absence.getEndDate());
+        DateTime end = new DateTime(Date.from(absence.getEndDate().toInstant()));
         VEvent event;
 
         if (absence.isAllDay()) {
-            org.joda.time.DateTime dateTime = new org.joda.time.DateTime(absence.getStartDate());
-            DateTime start = new DateTime(dateTime.plusDays(1).toDate());
+            ZonedDateTime dateTime = absence.getStartDate();
+            DateTime start = new DateTime(DateTime.from(dateTime.toInstant()));
 
             event = new VEvent(new Date(start.getTime()), absence.getEventSubject());
         } else {
-            DateTime start = new DateTime(absence.getStartDate());
+            LocalDateTime ldt = LocalDateTime.ofInstant(absence.getStartDate().toInstant(), ZoneOffset.UTC);
+
+            DateTime start = new DateTime(Date.from(ldt.toInstant(ZoneOffset.UTC)));
+
             event = new VEvent(start, end, absence.getEventSubject());
         }
 
