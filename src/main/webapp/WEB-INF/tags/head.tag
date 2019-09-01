@@ -1,8 +1,10 @@
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@taglib prefix="asset" uri = "/WEB-INF/asset.tld"%>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1"/>
+<sec:csrfMetaTags />
 <title><spring:message code="header.title"/></title>
 <link rel="shortcut icon" type="image/x-icon" href="<spring:url value='/favicon.ico?' />" />
 <link rel="stylesheet" type="text/css" href="<asset:url value='npm.font-awesome.css' />" />
