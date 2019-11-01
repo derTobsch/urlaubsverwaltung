@@ -1,10 +1,11 @@
 ### master
-* Add thuringia childrens day holiday [#790](https://github.com/synyx/urlaubsverwaltung/pull/790)
 * API-Change: Move `api/availability` to `api/person/persons/{personId}/availabilities` [808](https://github.com/synyx/urlaubsverwaltung/issues/808)
 * Add default workdays to the configuration properties [828](https://github.com/synyx/urlaubsverwaltung/pull/828)
 * Upgrade spring boot parent to 2.1.9
 * Upgrade google api client to 1.25.0
 * Upgrade jollyday to 0.5.9
+  * Add thuringia childrens day holiday [#790](https://github.com/synyx/urlaubsverwaltung/pull/790)
+  * [General jollyday 0.5.9 upgrades](https://github.com/svendiedrichsen/jollyday/commits/v_0_5_9) 
 * rename loginName to username [839](https://github.com/synyx/urlaubsverwaltung/pull/839)
 
 ### [urlaubsverwaltung-3.0.0.RC7](https://github.com/synyx/urlaubsverwaltung/releases/tag/urlaubsverwaltung-3.0.0.RC7)
