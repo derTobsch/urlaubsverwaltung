@@ -51,7 +51,7 @@ public class VacationAbsenceProviderTest {
             .thenReturn(Collections.singletonList(application));
 
         TimedAbsenceSpans updatedTimedAbsenceSpans = vacationAbsenceProvider.checkForAbsence(emptyTimedAbsenceSpans,
-                testPerson, vacationDay);
+            testPerson, vacationDay);
 
         List<TimedAbsence> absencesList = updatedTimedAbsenceSpans.getAbsencesList();
 
@@ -69,11 +69,11 @@ public class VacationAbsenceProviderTest {
         LocalDate standardWorkingDay = LocalDate.of(2016, 1, 5);
 
         when(applicationService.getApplicationsForACertainPeriodAndPerson(standardWorkingDay,
-                    standardWorkingDay, testPerson))
+            standardWorkingDay, testPerson))
             .thenReturn(Collections.emptyList());
 
         TimedAbsenceSpans updatedTimedAbsenceSpans = vacationAbsenceProvider.checkForAbsence(emptyTimedAbsenceSpans,
-                testPerson, vacationDay);
+            testPerson, vacationDay);
 
         Assert.assertEquals("absence spans changed", emptyTimedAbsenceSpans, updatedTimedAbsenceSpans);
     }

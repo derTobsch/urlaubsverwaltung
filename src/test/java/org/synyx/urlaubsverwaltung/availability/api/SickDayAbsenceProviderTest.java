@@ -67,7 +67,7 @@ public class SickDayAbsenceProviderTest {
     public void ensurePersonIsNotAvailableOnSickDay() {
 
         TimedAbsenceSpans updatedTimedAbsenceSpans = sickDayAbsenceProvider.checkForAbsence(emptyTimedAbsenceSpans,
-                testPerson, sickDay);
+            testPerson, sickDay);
 
         List<TimedAbsence> absencesList = updatedTimedAbsenceSpans.getAbsencesList();
 
