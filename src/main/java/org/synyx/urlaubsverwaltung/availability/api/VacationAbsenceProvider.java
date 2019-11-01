@@ -52,13 +52,13 @@ class VacationAbsenceProvider extends AbstractTimedAbsenceProvider {
     private Optional<TimedAbsence> checkForVacation(LocalDate date, Person person) {
 
         List<Application> applications = applicationService.getApplicationsForACertainPeriodAndPerson(date, date,
-                    person)
-                .stream()
-                .filter(application ->
-                            application.hasStatus(ApplicationStatus.WAITING)
-                            || application.hasStatus(ApplicationStatus.TEMPORARY_ALLOWED)
-                            || application.hasStatus(ApplicationStatus.ALLOWED))
-                .collect(Collectors.toList());
+            person)
+            .stream()
+            .filter(application ->
+                application.hasStatus(ApplicationStatus.WAITING)
+                    || application.hasStatus(ApplicationStatus.TEMPORARY_ALLOWED)
+                    || application.hasStatus(ApplicationStatus.ALLOWED))
+            .collect(Collectors.toList());
 
         if (applications.isEmpty()) {
             return Optional.empty();
