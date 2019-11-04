@@ -118,7 +118,7 @@ public class LdapSecurityConfiguration {
         @Bean
         public LdapUserDataImporter ldapUserDataImporter(LdapUserService ldapUserService, PersonSyncService personSyncService,
                                                          PersonService personService) {
-            return new LdapUserDataImporter(ldapUserService, personSyncService, personService);
+            return new LdapUserDataImporter(ldapUserService, personSyncService, personService, directoryServiceSecurityProperties);
         }
 
         @Bean
